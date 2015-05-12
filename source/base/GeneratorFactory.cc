@@ -31,6 +31,7 @@ GeneratorFactory::~GeneratorFactory()
 //////////////////////////////////////////////////////////////////////
 
 #include "SingleParticle.h"
+#include "ScintillationGenerator.h"
 #include "Decay0Interface.h"
 #include "IonGun.h"
 #include "Na22Generation.h"
@@ -43,6 +44,8 @@ G4VPrimaryGenerator* GeneratorFactory::CreateGenerator() const
   G4VPrimaryGenerator* p = 0;
 
   if (_name == "SINGLE_PARTICLE") p = new SingleParticle();
+
+  else if (_name == "S1GENERATOR") p = new ScintillationGenerator();
 
   else if (_name == "DECAY0") p = new Decay0Interface();
 
