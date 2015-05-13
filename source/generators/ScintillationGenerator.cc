@@ -19,6 +19,7 @@
 #include <G4PrimaryVertex.hh>
 #include <G4Event.hh>
 #include <G4RandomDirection.hh>
+#include <G4OpticalPhoton.hh>
 
 #include "CLHEP/Units/SystemOfUnits.h"
 
@@ -27,7 +28,7 @@ using namespace CLHEP;
 
 
 ScintillationGenerator::ScintillationGenerator() :
-G4VPrimaryGenerator(), _msg(0), _particle_definition(0),
+  G4VPrimaryGenerator(), _msg(0), _particle_definition(G4OpticalPhoton::Definition()),
 _geom(0), _position_X(0.),_position_Y(0.), _position_Z(0.),
 _nphotons(1000000)
 {
