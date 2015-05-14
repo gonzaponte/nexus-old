@@ -70,13 +70,12 @@ void ScintillationGenerator::GeneratePrimaryVertex(G4Event* event)
   // Generate an initial position for the particle using the geometry and set time to 0.
   G4ThreeVector position = G4ThreeVector( _position_X, _position_Y, _position_Z );
   G4double time = 0.;
-
+  
   // Create a new vertex
   G4PrimaryVertex* vertex = new G4PrimaryVertex(position, time);
-
+  
   for ( G4int i = 0; i<_nphotons; i++)
     {
-
       // Generate random direction by default
       G4ThreeVector _momentum_direction = G4RandomDirection();
       G4double pmod = GetEnergy();
@@ -92,8 +91,8 @@ void ScintillationGenerator::GeneratePrimaryVertex(G4Event* event)
       
       // Add particle to the vertex and this to the event
       vertex->SetPrimary(particle);
-      }
-    event->AddPrimaryVertex(vertex);
+    }
+  event->AddPrimaryVertex(vertex);
 }
 
 void ScintillationGenerator::SetEnergy(double e) { _energy = e; }

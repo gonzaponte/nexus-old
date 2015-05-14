@@ -27,8 +27,6 @@ namespace nexus {
   /// consisting of a single particle. The user must specify via configuration
   /// parameters the particle type, a kinetic energy interval (a random
   /// value with random .
-  /// Particle energy is generated with flat random probability
-  /// between E_min and E_max.
   
   class ScintillationGenerator: public G4VPrimaryGenerator
   {
@@ -52,8 +50,6 @@ namespace nexus {
 
     void SetParticleDefinition(G4String);
 
-    /// Generate a random kinetic energy with flat probability in 
-    //  the interval [energy_min, energy_max].
     G4double _position_X;
     G4double _position_Y;
     G4double _position_Z;
