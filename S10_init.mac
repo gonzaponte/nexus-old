@@ -1,0 +1,15 @@
+
+### --------------------------------------------------------
+###  nexus_NEW.S1: Initialization macro of nexus.
+###  $Id: nexus_NEW.S1.init.mac 10047 2015-01-23 17:07:30Z paola $
+### -------------------------------------------------------
+#Use NEXT_NEW to simulate the hole geometry
+#Use OPTICAL_GEOMETRY to simulate only the inner part of the detector
+/control/execute macros/physics/DefaultPhysicsList.mac
+/Geometry/RegisterGeometry OPTICAL_GEOMETRY
+/Generator/RegisterGenerator S1GENERATOR
+/Actions/RegisterTrackingAction DEFAULT
+/Actions/RegisterEventAction DEFAULT
+/Actions/RegisterRunAction DEFAULT
+##/Actions/RegisterSteppingAction DEFAULT
+/nexus/RegisterMacro ./S10_config.mac
