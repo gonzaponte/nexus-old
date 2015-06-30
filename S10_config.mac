@@ -12,7 +12,7 @@
 /Generator/S1generator/xpos 5.0
 /Generator/S1generator/ypos 5.0
 /Generator/S1generator/zpos 0.0
-/Generator/S1generator/nphotons 100000
+/Generator/S1generator/nphotons 1000000
 # GEOMETRY
 /Geometry/NextNewOpticalGeometry/pressure 15. bar
 #/Geometry/NextNewOpticalGeometry/elfield false
