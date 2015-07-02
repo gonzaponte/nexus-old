@@ -12,4 +12,4 @@
 /Actions/RegisterEventAction EL_SIM
 /Actions/RegisterRunAction DEFAULT
 ##/Actions/RegisterSteppingAction DEFAULT
-/nexus/RegisterMacro ./S10_config.mac
+/nexus/RegisterMacro ./S1_config.mac
