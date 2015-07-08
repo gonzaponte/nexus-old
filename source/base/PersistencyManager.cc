@@ -1,7 +1,7 @@
 // ----------------------------------------------------------------------------
 //  $Id$
 //
-//  Author : <justo.martin-albo@ific.uv.es>    
+//  Author : <justo.martin-albo@ific.uv.es>
 //  Created: 15 March 2013
 //
 //  Copyright (c) 2013 NEXT Collaboration. All rights reserved.
@@ -40,16 +40,19 @@ using namespace nexus;
 
 
 
-PersistencyManager::PersistencyManager(): 
-  G4VPersistencyManager(), _msg(0), _historyFile("G4history.macro"), 
-  _ready(false), _store_evt(true),  _evt(0), _writer(0)
+PersistencyManager::PersistencyManager():
+  G4VPersistencyManager(), _msg(0), _historyFile("G4history.macro"),
+  _ready(false), _store_evt(true), _store_traj(true),
+  _store_Ihits(true), _store_PMThits(true), _evt(0), _writer(0)
 {
   _msg = new G4GenericMessenger(this, "/nexus/persistency/");
   _msg->DeclareMethod("outputFile", &PersistencyManager::OpenFile, "");
-  _msg->DeclareProperty("historyFile", _historyFile, "Name of the file where the configuration information are stored");
+  _msg->DeclareProperty("historyFile", _historyFile, "Name of the file where the configuration information is stored");
+
+  _msg->DeclareProperty("StoreTrajectories", _store_traj, "Flag to decide whether to store trajectories or not");
+  _msg->DeclareProperty("StoreIonizationHits", _store_Ihits, "Flag to decide whether to store ionization hits or not");
+  _msg->DeclareProperty("StorePMTHits", _store_PMThits, "Flag to decide whether to store PMT hits or not");
 }
-
-
 
 PersistencyManager::~PersistencyManager()
 {
@@ -75,20 +78,19 @@ void PersistencyManager::Initialize()
 }
 
 
-
 void PersistencyManager::OpenFile(const G4String& filename)
 {
   // If the output file was not set yet, do so
   if (!_ready) {
     _writer = new irene::RootWriter();
     _ready = (G4bool) _writer->Open(filename.data(), "RECREATE");
-    
+
     if (!_ready)
-      G4Exception("OpenFile()", "[PersistencyManager]", 
+      G4Exception("OpenFile()", "[PersistencyManager]",
         FatalException, "The path for the output file does not exist.");
   }
   else {
-    G4Exception("OpenFile()", "[PersistencyManager]", 
+    G4Exception("OpenFile()", "[PersistencyManager]",
       JustWarning, "An output file was previously opened.");
   }
 }
@@ -107,7 +109,7 @@ void PersistencyManager::CloseFile()
 G4bool PersistencyManager::Store(const G4Event* event)
 {
   if (!_store_evt) {
-    TrajectoryMap::Clear();    
+    TrajectoryMap::Clear();
     return false;
   }
 
@@ -115,9 +117,11 @@ G4bool PersistencyManager::Store(const G4Event* event)
   irene::Event ievt(event->GetEventID());
 
   // Store the trajectories of the event as Irene particles
-  StoreTrajectories(event->GetTrajectoryContainer(), &ievt);
+  if (_store_traj)
+    StoreTrajectories(event->GetTrajectoryContainer(), &ievt);
 
-  StoreHits(event->GetHCofThisEvent(), &ievt);
+  if (_store_Ihits || _store_PMThits)
+    StoreHits(event->GetHCofThisEvent(), &ievt);
 
 
   // Add event to the tree
@@ -149,7 +153,7 @@ void PersistencyManager::StoreTrajectories(G4TrajectoryContainer* tc,
 
     // Create an irene particle to store the trajectory information
     irene::Particle* ipart = new irene::Particle(trj->GetPDGEncoding());
-    
+
     G4int trackid = trj->GetTrackID();
     ipart->SetParticleID(trj->GetTrackID());
     _iprtmap[trackid] = ipart;
@@ -159,7 +163,7 @@ void PersistencyManager::StoreTrajectories(G4TrajectoryContainer* tc,
 
     G4ThreeVector xyz = trj->GetInitialPosition();
     G4double t = trj->GetInitialTime();
-    ipart->SetInitialVertex(xyz.x(), xyz.y(), xyz.z(), t);      
+    ipart->SetInitialVertex(xyz.x(), xyz.y(), xyz.z(), t);
 
     xyz = trj->GetFinalPosition();
     t = trj->GetFinalTime();
@@ -204,7 +208,7 @@ void PersistencyManager::StoreTrajectories(G4TrajectoryContainer* tc,
 
 void PersistencyManager::StoreHits(G4HCofThisEvent* hce, irene::Event* ievt)
 {
-  if (!hce) return; 
+  if (!hce) return;
 
   G4SDManager* sdmgr = G4SDManager::GetSDMpointer();
   G4HCtable* hct = sdmgr->GetHCtable();
@@ -212,7 +216,7 @@ void PersistencyManager::StoreHits(G4HCofThisEvent* hce, irene::Event* ievt)
   // Loop through the hits collections
   for (int i=0; i<hct->entries(); i++) {
 
-    // Collection are identified univocally (in principle) using 
+    // Collection are identified univocally (in principle) using
     // their id number, and this can be obtained using the collection
     // and sensitive detector names.
     G4String hcname = hct->GetHCname(i);
@@ -222,12 +226,12 @@ void PersistencyManager::StoreHits(G4HCofThisEvent* hce, irene::Event* ievt)
     // Fetch collection using the id number
     G4VHitsCollection* hits = hce->GetHC(hcid);
 
-    if (hcname == IonizationSD::GetCollectionUniqueName())
+    if ( _store_Ihits && ( hcname == IonizationSD::GetCollectionUniqueName() ) )
       StoreIonizationHits(hits, ievt);
-    else if (hcname == PmtSD::GetCollectionUniqueName())
+    else if ( _store_PMThits && ( hcname == PmtSD::GetCollectionUniqueName() ) )
       StorePmtHits(hits, ievt);
     else {
-      G4String msg = 
+      G4String msg =
         "Collection of hits '" + sdname + "/" + hcname
         + "' is of an unknown type and will not be stored.";
       G4Exception("StoreHits()", "[PersistencyManager]", JustWarning, msg);
@@ -238,17 +242,17 @@ void PersistencyManager::StoreHits(G4HCofThisEvent* hce, irene::Event* ievt)
 
 
 
-void PersistencyManager::StoreIonizationHits(G4VHitsCollection* hc, 
+void PersistencyManager::StoreIonizationHits(G4VHitsCollection* hc,
                                              irene::Event* ievt)
 {
-  IonizationHitsCollection* hits = 
+  IonizationHitsCollection* hits =
     dynamic_cast<IonizationHitsCollection*>(hc);
   if (!hits) return;
 
   _itrkmap.clear();
 
   for (G4int i=0; i<hits->entries(); i++) {
-    
+
     IonizationHit* hit = dynamic_cast<IonizationHit*>(hits->GetHit(i));
     if (!hit) continue;
 
@@ -272,14 +276,14 @@ void PersistencyManager::StoreIonizationHits(G4VHitsCollection* hc,
     G4ThreeVector xyz = hit->GetPosition();
     itrk->AddHit(xyz.x(), xyz.y(), xyz.z(), hit->GetTime(),
                  hit->GetEnergyDeposit());
-   
+
   }
-   
+
 }
 
 
 
-void PersistencyManager::StorePmtHits(G4VHitsCollection* hc, 
+void PersistencyManager::StorePmtHits(G4VHitsCollection* hc,
                                       irene::Event* ievt)
 {
   PmtHitsCollection* hits = dynamic_cast<PmtHitsCollection*>(hc);
@@ -310,7 +314,7 @@ void PersistencyManager::StorePmtHits(G4VHitsCollection* hc,
     }
     isnr->SetAmplitude(amplitude);
 
-   
+
     // Add the sensor hit to the irene event
     ievt->AddSensorHit(isnr);
   }
@@ -333,11 +337,11 @@ G4bool PersistencyManager::Store(const G4Run*)
       info->SetContent(value);
       _writer->WriteMetadata(info);
     }
-  } 
+  }
 
   history.close();
 
-  // Store the number of events to be processed 
+  // Store the number of events to be processed
   NexusApp* app = (NexusApp*) G4RunManager::GetRunManager();
   G4int num_events = app->GetNumberOfEventsToBeProcessed();
 
@@ -347,6 +351,6 @@ G4bool PersistencyManager::Store(const G4Run*)
   irene::ParameterInfo* info = new irene::ParameterInfo("num_events");
   info->SetContent(ss.str());
   _writer->WriteMetadata(info);
-  
+
   return true;
 }
