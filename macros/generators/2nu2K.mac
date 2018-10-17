@@ -1,0 +1,6 @@
+### --------------------------------------------------------
+###  Example config macro for the 2-neutrino double electron
+###  capture generator.
+### --------------------------------------------------------
+
+/Generator/2NU2K/region ACTIVE
