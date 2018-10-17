@@ -1,0 +1,21 @@
+### --------------------------------------------------------
+###  This init macro simulates bb0nu decays
+###  in the NEW detector geometry
+### --------------------------------------------------------
+
+/run/verbose 0
+/event/verbose 0
+/tracking/verbose 0
+/control/execute macros/generators/2nu2K.mac
+#
+/Geometry/NextNew/pressure 10. bar
+/Geometry/NextNew/elfield false
+
+# PHYSICS
+/control/execute macros/physics/IonizationElectron.mac
+
+
+/nexus/persistency/outputFile ecec_test.next
+#/nexus/persistency/historyFile myHistory.macro ## must be the same as /nexus/historyFile
+
+/nexus/random_seed 542862
