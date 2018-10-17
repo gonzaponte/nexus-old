@@ -16,11 +16,13 @@
 #ifndef __TwoNuTwoK__
 #define __TwoNuTwoK__
 
+#include <vector>
 #include <G4VPrimaryGenerator.hh>
 
 class G4GenericMessenger;
 class G4Event;
-class G4ParticleDefinition;
+class G4DynamicParticle;
+class G4PrimaryParticle;
 
 namespace nexus{
 
@@ -39,17 +41,16 @@ namespace nexus{
     void GeneratePrimaryVertex(G4Event*);
 
   private:
-    void SetParticleDefinition();
+                G4PrimaryParticle*  GetPrimaryParticle(G4DynamicParticle*);
+    std::vector<G4PrimaryParticle*> GeneratePrimaryParticles();
 
  private:
     G4GenericMessenger  * _msg;
-    G4ParticleDefinition* _ion;
     const BaseGeometry  * _geom;
 
     G4String _region;
-    G4int    _z; // atomic number
-    G4int    _a; // mass number
-    G4double _e; // excitation energy
+    G4int    _z;        // atomic number
+    G4double _shell_id; // shell id of vacancy
   };
 
 } // end namespace nexus
