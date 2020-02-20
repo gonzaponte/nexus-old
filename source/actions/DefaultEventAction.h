@@ -18,10 +18,11 @@
 class G4Event;
 class G4GenericMessenger;
 
+
 namespace nexus {
-    
+
   /// This class is a general-purpose event run action.
-  
+
   class DefaultEventAction: public G4UserEventAction
   {
   public:
@@ -29,7 +30,7 @@ namespace nexus {
     DefaultEventAction();
     /// Destructor
     ~DefaultEventAction();
-    
+
     /// Hook at the beginning of the event loop
     void BeginOfEventAction(const G4Event*);
     /// Hook at the end of the event loop
@@ -41,7 +42,7 @@ namespace nexus {
     G4double _energy_threshold;
     G4double _energy_max;
   };
-  
+
 } // namespace nexus
 
 #endif

@@ -1,7 +1,7 @@
 // ----------------------------------------------------------------------------
 //  $Id$
 //
-//  Author : <justo.martin-albo@ific.uv.es>    
+//  Author : <justo.martin-albo@ific.uv.es>
 //  Created: 13 March 2013
 //
 //  Copyright (c) 2013 NEXT Collaboration. All rights reserved.
@@ -36,8 +36,6 @@ GeneratorFactory::~GeneratorFactory()
 #include "Na22Generation.h"
 #include "Kr83mGeneration.h"
 #include "SingleParticle2Pi.h"
-#include "MuonGenerator.h"
-#include "MuonAngleGenerator.h"
 #include "NeutronGenerator.h"
 #include "ELTableGenerator.h"
 #include "ScintillationGenerator.h"
@@ -47,7 +45,7 @@ GeneratorFactory::~GeneratorFactory()
 G4VPrimaryGenerator* GeneratorFactory::CreateGenerator() const
 {
   G4VPrimaryGenerator* p = 0;
-  
+
   if (_name == "SINGLE_PARTICLE") p = new SingleParticle();
 
   else if (_name == "DECAY0") p = new Decay0Interface();
@@ -59,10 +57,6 @@ G4VPrimaryGenerator* GeneratorFactory::CreateGenerator() const
   else if (_name == "Kr83m") p = new Kr83mGeneration();
 
   else if (_name == "2PI") p = new SingleParticle2Pi();
-
-  else if (_name == "MUON_GENERATOR") p = new MuonGenerator();
-
-  else if (_name == "LABMUON_GENERATOR") p = new MuonAngleGenerator();
 
   else if (_name == "NEUTRON_GENERATOR") p = new NeutronGenerator();
 
@@ -80,5 +74,3 @@ G4VPrimaryGenerator* GeneratorFactory::CreateGenerator() const
 
   return p;
 }
-
-
