@@ -53,6 +53,7 @@ namespace nexus {
     void BuildActive();
     void BuildBuffer();
     void BuildELRegion();
+    void BuildGateGrid(G4LogicalVolume*);
     void BuildFieldCage();
     void BuildAnodeGrid();
     void BuildTrackingFrames();
@@ -87,8 +88,8 @@ namespace nexus {
     G4double hdpe_length_, hdpe_in_diam_, hdpe_out_diam_, hdpe_ledge_;
     G4double  ring_width_, ring_thickness_, tube_z_pos_;
     G4double tpb_thickness_;
-    G4double el_gap_z_pos_, pos_z_anode_, pos_z_cathode_, el_gap_length_, grid_thickness_;
-    G4double gate_transparency_;
+    G4double el_gap_z_pos_, pos_z_anode_, pos_z_cathode_, el_gap_length_;
+    G4double wire_diam_, wire_pitch_;
     G4double anode_quartz_thickness_, anode_quartz_diam_; //anode_quartz_transparency_
     G4double cathode_grid_transparency_;
     G4double pedot_thickness_;

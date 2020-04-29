@@ -62,8 +62,8 @@ namespace nexus {
     ring_thickness_ (3. * mm),
     tpb_thickness_(1. * micrometer),
     el_gap_length_ (6 * mm),
-    grid_thickness_ (.1 * mm), //it's just fake dielectric
-    gate_transparency_ (.84),
+    wire_diam_(45. * micrometer),
+    wire_pitch_(500. * micrometer),
     anode_quartz_thickness_ (3. * mm),
     anode_quartz_diam_ (522. * mm),
     cathode_grid_transparency_ (.98),
@@ -420,28 +420,7 @@ void NextNewFieldCage::BuildBuffer()
       el_region->AddRootLogicalVolume(el_gap_logic);
     }
 
-    ///// EL GRIDS /////
-
-    G4Material* fgate_mat =
-      MaterialsList::FakeDielectric(gas_, "el_grid_gate_mat");
-    fgate_mat->SetMaterialPropertiesTable(OpticalMaterialProperties::FakeGrid(pressure_,
-                                                                              temperature_,
-                                                                              gate_transparency_,
-                                                                              grid_thickness_));
-
-    // Dimensions & position: the grids are simulated inside the EL gap.
-    // Their thickness is symbolic.
-    G4double grid_diam = tube_in_diam_; // active_diam_;
-    G4double poszInner =  - el_gap_length_/2. + grid_thickness_/2.;
-
-    G4Tubs* diel_grid_solid =
-      new G4Tubs("EL_GRID", 0., grid_diam/2., grid_thickness_/2., 0, twopi);
-
-    G4LogicalVolume* gate_logic =
-      new G4LogicalVolume(diel_grid_solid, fgate_mat, "EL_GRID_GATE");
-
-    new G4PVPlacement(0, G4ThreeVector(0., 0., poszInner), gate_logic,
-		      "EL_GRID_GATE", el_gap_logic, false, 0, false);
+    BuildGateGrid(el_gap_logic);
 
     /// Visibilities
     if (visibility_) {
@@ -449,13 +428,83 @@ void NextNewFieldCage::BuildBuffer()
       gap_col.SetForceSolid(true);
       el_gap_logic->SetVisAttributes(gap_col);
       G4VisAttributes gate_col = nexus::LightBlue();
-      // gate_col.SetForceSolid(true);
-      gate_logic->SetVisAttributes(gate_col);
-    }
-    else {
-      gate_logic->SetVisAttributes(G4VisAttributes::Invisible);
     }
   }
+
+void NextNewFieldCage::BuildGateGrid(G4LogicalVolume* el_gap_logic)
+  {
+    G4Material* wire_material =
+      G4NistManager::Instance()->FindOrBuildMaterial("G4_STAINLESS-STEEL");
+
+    G4double z_horizontal = -el_gap_length_/2. +   wire_diam_/2.;
+    G4double z_vertical   = -el_gap_length_/2. + 3*wire_diam_/2.;
+
+    G4RotationMatrix* along_x_axis = new G4RotationMatrix(); along_x_axis->rotateY(90 * deg);
+    G4RotationMatrix* along_y_axis = new G4RotationMatrix(); along_y_axis->rotateX(90 * deg);
+
+    G4int n_wires = std::ceil(tube_in_diam_ / wire_pitch_) - 1;
+
+    // HORIZONTAL WIRES
+    for (G4int i=1; i<n_wires; i++)
+    {
+      G4double y           = -tube_in_diam_/2. + wire_pitch_ * i;
+      G4double wire_length =  tube_in_diam_    * std::sin(std::acos(2*y/tube_in_diam_));
+
+      G4String name = "GATE_GRID_WIRE_HORIZONTAL_" + std::to_string(i);
+      G4Tubs* wire_solid = new G4Tubs(name,
+                                      0., wire_diam_ /2.,
+                                          wire_length/2.,
+                                      0., twopi);
+
+      G4LogicalVolume* wire_logic = new G4LogicalVolume(wire_solid,
+                                                        wire_material,
+                                                        name);
+
+      new G4PVPlacement(along_x_axis,
+                        G4ThreeVector(0, y, z_horizontal),
+                        wire_logic,
+                        name,
+                        el_gap_logic,
+                        false,
+                        0,
+                        false);
+
+    if (visibility_) wire_logic->SetVisAttributes(nexus::LightBlue());
+    else             wire_logic->SetVisAttributes(G4VisAttributes::Invisible);
+
+    }
+
+    // VERTICAL WIRES
+    for (G4int i=1; i<n_wires; i++)
+    {
+      G4double x           = -tube_in_diam_/2. + wire_pitch_ * i;
+      G4double wire_length =  tube_in_diam_    * std::sin(std::acos(2*x/tube_in_diam_));
+
+      G4String name = "GATE_GRID_WIRE_VERTICAL_" + std::to_string(i);
+      G4Tubs* wire_solid = new G4Tubs(name,
+                                      0., wire_diam_ /2.,
+                                          wire_length/2.,
+                                      0., twopi);
+
+      G4LogicalVolume* wire_logic = new G4LogicalVolume(wire_solid,
+                                                        wire_material,
+                                                        name);
+
+      new G4PVPlacement(along_y_axis,
+                        G4ThreeVector(x, 0, z_vertical),
+                        wire_logic,
+                        name,
+                        el_gap_logic,
+                        false,
+                        0,
+                        false);
+
+      if (visibility_) wire_logic->SetVisAttributes(nexus::LightBlue());
+      else             wire_logic->SetVisAttributes(G4VisAttributes::Invisible);
+    }
+
+  }
+
 
   void NextNewFieldCage::BuildAnodeGrid()
   {
