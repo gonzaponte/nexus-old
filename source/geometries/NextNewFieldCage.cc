@@ -82,6 +82,9 @@ namespace nexus {
     max_step_size_(1. * mm),
     // EL field ON or OFF
     elfield_(0),
+    // mesh geometry ON or OFF
+    real_mesh_(false),
+
     el_table_index_(0),
     el_table_binning_(5. * mm)
   {
@@ -118,6 +121,9 @@ namespace nexus {
 			  "Field Cage Visibility");
     msg_->DeclareProperty("elfield", elfield_,
 			  "True if the EL field is on (full simulation), false if it's not (parametrized simulation.");
+
+    msg_->DeclareProperty("real_mesh", real_mesh_,
+			  "True to use real mesh geometry, False for fake dielectric geometry");
 
     G4GenericMessenger::Command& step_cmd =
       msg_->DeclareProperty("max_step_size", max_step_size_,
@@ -420,7 +426,8 @@ void NextNewFieldCage::BuildBuffer()
       el_region->AddRootLogicalVolume(el_gap_logic);
     }
 
-    BuildGateGrid(el_gap_logic);
+    if (real_mesh_) BuildRealGateGrid(el_gap_logic);
+    else            BuildFakeGateGrid(el_gap_logic);
 
     /// Visibilities
     if (visibility_) {
@@ -431,7 +438,7 @@ void NextNewFieldCage::BuildBuffer()
     }
   }
 
-void NextNewFieldCage::BuildGateGrid(G4LogicalVolume* el_gap_logic)
+  void NextNewFieldCage::BuildRealGateGrid(G4LogicalVolume* el_gap_logic)
   {
     G4Material* wire_material =
       G4NistManager::Instance()->FindOrBuildMaterial("G4_STAINLESS-STEEL");
@@ -502,6 +509,35 @@ void NextNewFieldCage::BuildGateGrid(G4LogicalVolume* el_gap_logic)
       if (visibility_) wire_logic->SetVisAttributes(nexus::LightBlue());
       else             wire_logic->SetVisAttributes(G4VisAttributes::Invisible);
     }
+
+  }
+
+
+  void NextNewFieldCage::BuildFakeGateGrid(G4LogicalVolume* el_gap_logic)
+  {
+    G4Material* fgate_mat = MaterialsList::FakeDielectric(gas_, "el_grid_gate_mat");
+    fgate_mat->SetMaterialPropertiesTable(OpticalMaterialProperties::FakeGrid(pressure_,
+                                                                              temperature_,
+                                                                              gate_transparency_,
+                                                                              wire_diam_));
+
+    // Dimensions & position: the grids are simulated inside the EL gap.
+    // Their thickness is symbolic.
+    G4double grid_diam = tube_in_diam_; // _active_diam;
+    G4double poszInner =  -el_gap_length_/2. + wire_diam_/2.;
+
+    G4Tubs* diel_grid_solid =
+      new G4Tubs("EL_GRID", 0., grid_diam/2., wire_diam_/2., 0, twopi);
+
+    G4LogicalVolume* gate_logic =
+      new G4LogicalVolume(diel_grid_solid, fgate_mat, "EL_GRID_GATE");
+
+    new G4PVPlacement(0, G4ThreeVector(0., 0., poszInner), gate_logic,
+                      "EL_GRID_GATE", el_gap_logic, false, 0, false);
+
+    /// Visibilities
+    if (visibility_) gate_logic->SetVisAttributes(nexus::LightBlue());
+    else             gate_logic->SetVisAttributes(G4VisAttributes::Invisible);
 
   }
 

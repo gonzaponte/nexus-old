@@ -53,7 +53,8 @@ namespace nexus {
     void BuildActive();
     void BuildBuffer();
     void BuildELRegion();
-    void BuildGateGrid(G4LogicalVolume*);
+    void BuildRealGateGrid(G4LogicalVolume*);
+    void BuildFakeGateGrid(G4LogicalVolume*);
     void BuildFieldCage();
     void BuildAnodeGrid();
     void BuildTrackingFrames();
@@ -89,7 +90,7 @@ namespace nexus {
     G4double  ring_width_, ring_thickness_, tube_z_pos_;
     G4double tpb_thickness_;
     G4double el_gap_z_pos_, pos_z_anode_, pos_z_cathode_, el_gap_length_;
-    G4double wire_diam_, wire_pitch_;
+    G4double wire_diam_, wire_pitch_, gate_transparency_;
     G4double anode_quartz_thickness_, anode_quartz_diam_; //anode_quartz_transparency_
     G4double cathode_grid_transparency_;
     G4double pedot_thickness_;
@@ -111,6 +112,7 @@ namespace nexus {
 
     G4double max_step_size_;
     G4bool elfield_;
+    G4bool real_mesh_;
 
     // Vertex generators
     CylinderPointSampler* drift_tube_gen_;
