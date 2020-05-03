@@ -1,0 +1,20 @@
+### --------------------------------------------------------
+###  NextNew: Initialization macro of nexus.
+###  $Id: NextNew.init.mac  2013-09-09 13:05 minegui $
+### --------------------------------------------------------
+
+### This macro simulates individual particles in the NEW detector geometry
+### It simulates only the inner part of the detector
+
+
+/control/execute macros/physics/DefaultPhysicsList.mac
+
+/Geometry/RegisterGeometry NEXT_NEW
+
+/Generator/RegisterGenerator SINGLE_PARTICLE
+
+/Actions/RegisterTrackingAction DEFAULT
+/Actions/RegisterEventAction DEFAULT
+/Actions/RegisterRunAction DEFAULT
+
+/nexus/RegisterMacro macros/NEW_realmesh.config.mac
