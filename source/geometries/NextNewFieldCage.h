@@ -54,6 +54,7 @@ namespace nexus {
     void BuildBuffer();
     void BuildELRegion();
     void BuildRealGateGridFlat(G4LogicalVolume*);
+    void BuildRealGateGridSagg(G4LogicalVolume*);
     void BuildFakeGateGrid    (G4LogicalVolume*);
     void BuildFieldCage();
     void BuildAnodeGrid();
@@ -113,6 +114,8 @@ namespace nexus {
     G4double max_step_size_;
     G4bool elfield_;
     G4bool real_mesh_;
+
+    G4double mesh_sagging_;
 
     // Vertex generators
     CylinderPointSampler* drift_tube_gen_;

@@ -24,6 +24,7 @@
 #include <G4Material.hh>
 #include <G4LogicalVolume.hh>
 #include <G4Tubs.hh>
+#include <G4Torus.hh>
 #include <G4OpticalSurface.hh>
 #include <G4LogicalSkinSurface.hh>
 #include <G4LogicalBorderSurface.hh>
@@ -84,6 +85,7 @@ namespace nexus {
     elfield_(0),
     // mesh geometry ON or OFF
     real_mesh_(false),
+    mesh_sagging_(0 * mm), // maximum differente from planitude
 
     el_table_index_(0),
     el_table_binning_(5. * mm)
@@ -125,9 +127,14 @@ namespace nexus {
     msg_->DeclareProperty("real_mesh", real_mesh_,
 			  "True to use real mesh geometry, False for fake dielectric geometry");
 
+    G4GenericMessenger::Command& sagging_cmd =
+    msg_->DeclareProperty("mesh_sagging", mesh_sagging_,
+			  "Maximum difference from planitude");
+    sagging_cmd.SetUnitCategory("Length");
+
     G4GenericMessenger::Command& step_cmd =
-      msg_->DeclareProperty("max_step_size", max_step_size_,
-			    "Maximum Step Size");
+    msg_->DeclareProperty("max_step_size", max_step_size_,
+		    "Maximum Step Size");
     step_cmd.SetUnitCategory("Length");
     step_cmd.SetParameterName("max_step_size", false);
     step_cmd.SetRange("max_step_size>0.");
@@ -426,8 +433,9 @@ void NextNewFieldCage::BuildBuffer()
       el_region->AddRootLogicalVolume(el_gap_logic);
     }
 
-    if   (real_mesh_) BuildRealGateGridFlat(el_gap_logic);
-    else              BuildFakeGateGrid    (el_gap_logic);
+    if      (real_mesh_ && !mesh_sagging_) BuildRealGateGridFlat(el_gap_logic);
+    else if (real_mesh_ &&  mesh_sagging_) BuildRealGateGridSagg(el_gap_logic);
+    else                                   BuildFakeGateGrid    (el_gap_logic);
 
     /// Visibilities
     if (visibility_) {
@@ -499,6 +507,90 @@ void NextNewFieldCage::BuildBuffer()
 
       new G4PVPlacement(along_y_axis,
                         G4ThreeVector(x, 0, z_vertical),
+                        wire_logic,
+                        name,
+                        el_gap_logic,
+                        false,
+                        0,
+                        false);
+
+      if (visibility_) wire_logic->SetVisAttributes(nexus::LightBlue());
+      else             wire_logic->SetVisAttributes(G4VisAttributes::Invisible);
+    }
+
+  }
+
+
+  void NextNewFieldCage::BuildRealGateGridSagg(G4LogicalVolume* el_gap_logic)
+  {
+    G4Material* wire_material =
+      G4NistManager::Instance()->FindOrBuildMaterial("G4_STAINLESS-STEEL");
+
+    G4int    n_wires  = std::ceil(tube_in_diam_ / wire_pitch_) - 1;
+    G4double center_r = tube_in_diam_ * tube_in_diam_ / 8 / mesh_sagging_ + mesh_sagging_ / 2;
+
+
+    // HORIZONTAL WIRES
+    for (G4int i=1; i<n_wires; i++)
+    {
+      G4double y      = -tube_in_diam_/2. + wire_pitch_ * i;
+      G4double wire_r = std::sqrt(center_r * center_r - y * y);
+      G4double sagg   = mesh_sagging_ - (center_r - wire_r);
+      G4double wire_z = -el_gap_length_ / 2 - wire_r + sagg;
+      G4double theta  = std::acos(1 - sagg / wire_r);
+
+      G4RotationMatrix* rotation = new G4RotationMatrix(); // XY plane
+      rotation->rotateX(-90 * deg); // horizontal
+      rotation->rotateZ(-90 * deg); // XZ plane
+
+      G4String name = "GATE_GRID_WIRE_HORIZONTAL_" + std::to_string(i);
+      G4Torus* wire_solid = new G4Torus(name,
+                                        0, wire_diam_ /2.,
+                                        wire_r,
+                                        -theta, 2*theta);
+
+      G4LogicalVolume* wire_logic = new G4LogicalVolume(wire_solid,
+                                                        wire_material,
+                                                        name);
+
+      new G4PVPlacement(rotation,
+                        G4ThreeVector(0, y, wire_z),
+                        wire_logic,
+                        name,
+                        el_gap_logic,
+                        false,
+                        0,
+                        false);
+
+    if (visibility_) wire_logic->SetVisAttributes(nexus::LightBlue());
+    else             wire_logic->SetVisAttributes(G4VisAttributes::Invisible);
+
+    }
+
+    // VERTICAL WIRES
+    for (G4int i=1; i<n_wires; i++)
+    {
+      G4double x      = -tube_in_diam_/2. + wire_pitch_ * i;
+      G4double wire_r = std::sqrt(center_r * center_r - x * x);
+      G4double sagg   = mesh_sagging_ - (center_r - wire_r);
+      G4double wire_z = -el_gap_length_ / 2 - wire_r + sagg + wire_diam_;
+      G4double theta  = std::acos(1 - sagg / wire_r);
+
+      G4RotationMatrix* rotation = new G4RotationMatrix(); // XY plane
+      rotation->rotateY(90 * deg); // ZY plane
+
+      G4String name = "GATE_GRID_WIRE_VERTICAL_" + std::to_string(i);
+      G4Torus* wire_solid = new G4Torus(name,
+                                        0, wire_diam_ /2.,
+                                        wire_r,
+                                        -theta, 2*theta);
+
+      G4LogicalVolume* wire_logic = new G4LogicalVolume(wire_solid,
+                                                        wire_material,
+                                                        name);
+
+      new G4PVPlacement(rotation,
+                        G4ThreeVector(x, 0, wire_z),
                         wire_logic,
                         name,
                         el_gap_logic,
