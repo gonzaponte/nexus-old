@@ -426,8 +426,8 @@ void NextNewFieldCage::BuildBuffer()
       el_region->AddRootLogicalVolume(el_gap_logic);
     }
 
-    if (real_mesh_) BuildRealGateGrid(el_gap_logic);
-    else            BuildFakeGateGrid(el_gap_logic);
+    if   (real_mesh_) BuildRealGateGridFlat(el_gap_logic);
+    else              BuildFakeGateGrid    (el_gap_logic);
 
     /// Visibilities
     if (visibility_) {
@@ -438,7 +438,7 @@ void NextNewFieldCage::BuildBuffer()
     }
   }
 
-  void NextNewFieldCage::BuildRealGateGrid(G4LogicalVolume* el_gap_logic)
+  void NextNewFieldCage::BuildRealGateGridFlat(G4LogicalVolume* el_gap_logic)
   {
     G4Material* wire_material =
       G4NistManager::Instance()->FindOrBuildMaterial("G4_STAINLESS-STEEL");

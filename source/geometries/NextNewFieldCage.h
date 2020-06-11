@@ -53,8 +53,8 @@ namespace nexus {
     void BuildActive();
     void BuildBuffer();
     void BuildELRegion();
-    void BuildRealGateGrid(G4LogicalVolume*);
-    void BuildFakeGateGrid(G4LogicalVolume*);
+    void BuildRealGateGridFlat(G4LogicalVolume*);
+    void BuildFakeGateGrid    (G4LogicalVolume*);
     void BuildFieldCage();
     void BuildAnodeGrid();
     void BuildTrackingFrames();
