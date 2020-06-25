@@ -1,0 +1,32 @@
+### ---------------------------------------------------------
+### This init macro simulates geantinos in the NEW geometry
+### shot from an specific vertex isotropically
+### ---------------------------------------------------------
+
+
+/run/verbose 0
+/event/verbose 0
+/tracking/verbose 0
+
+# GENERATION
+/Generator/SingleParticle/particle geantino
+/Generator/SingleParticle/min_energy 7.20838 eV
+/Generator/SingleParticle/max_energy 7.20838 eV
+/Generator/SingleParticle/region ELGAP_SPAN
+/Generator/SingleParticle/momentum_X 0
+/Generator/SingleParticle/momentum_Y 0
+/Generator/SingleParticle/momentum_Z -1
+
+# ACTIONS
+#/Actions/SaveAllSteppingAction/select_particle opticalphoton
+
+# GEOMETRY
+#/Geometry/LHM/tpc_radius       10   cm
+#/Geometry/LHM/tpc_height       5    cm
+#/Geometry/LHM/gem_thickness    0.4  mm
+#/Geometry/LHM/interface_height 5    mm
+#/Geometry/LHM/elgap_length     1    cm
+#/Geometry/LHM/hole_diam        0.3  mm
+#/Geometry/LHM/hole_pitch       1    mm
+
+/nexus/persistency/outputFile /home/gonzalo/data/NEXT/lhm_backcount_center_1mmpitch_0.4mmthick_0.3mmdiam_5mmint_10mmelgap.next
