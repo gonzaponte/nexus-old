@@ -83,6 +83,7 @@ namespace nexus {
 
     static G4MaterialPropertiesTable* XXX();
 
+    static G4MaterialPropertiesTable* LXe();
 
   private:
 
