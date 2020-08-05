@@ -35,13 +35,15 @@ namespace nexus {
   LHM::LHM():
     BaseGeometry(),
     msg_(0),
-    tpc_radius_      (10  * cm),
-    tpc_height_      (5   * cm),
-    gem_thickness_   (0.4 * mm),
-    interface_height_(5   * mm),
-    elgap_length_    (1   * cm),
-    hole_diam_       (0.3 * mm),
-    hole_pitch_      (1   * mm)
+    tpc_radius_      (10   * cm),
+    tpc_height_      (5    * cm),
+    gem_thickness_   (0.4  * mm),
+    interface_height_(5    * mm),
+    elgap_length_    (1    * cm),
+    hole_diam_       (0.3  * mm),
+    hole_pitch_      (1    * mm),
+    csi_radius_      (5    * mm),
+    csi_thickness_   (0.01 * mm)
   {
     msg_ = new G4GenericMessenger(this, "/Geometry/LHM/", "Control commands of geometry LHM.");
 
@@ -87,6 +89,18 @@ namespace nexus {
     hole_pitch_cmd.SetParameterName("hole_pitch", false);
     hole_pitch_cmd.SetRange("hole_pitch>hole_diam");
 
+    G4GenericMessenger::Command&
+    tpc_radius_cmd = msg_->DeclareProperty("csi_radius", csi_radius_, "CsI radius");
+    tpc_radius_cmd.SetUnitCategory("Length");
+    tpc_radius_cmd.SetParameterName("csi_radius", false);
+    tpc_radius_cmd.SetRange("csi_radius>0.");
+
+    G4GenericMessenger::Command&
+    tpc_radius_cmd = msg_->DeclareProperty("csi_thickness", csi_thickness_, "CsI thickness");
+    tpc_radius_cmd.SetUnitCategory("Length");
+    tpc_radius_cmd.SetParameterName("csi_thickness", false);
+    tpc_radius_cmd.SetRange("csi_thickness>0.");
+
   }
 
   LHM::~LHM()
@@ -122,6 +136,8 @@ namespace nexus {
 
     G4ThreeVector        lxe_center(0, 0, -lxe_length/2 + interface_height_ + gem_thickness_);
     new G4PVPlacement(0, lxe_center, lxe_logic, "LXe", lab_logic, false, 0, false);
+
+
     // GXe
     // ------------------------------------------
     G4Tubs*          gxe_solid  = new G4Tubs("LXe", 0, tpc_radius_, elgap_length_/2, 0, twopi);
@@ -162,6 +178,37 @@ namespace nexus {
 
     G4ThreeVector        gem_center (0, 0, lxe_length/2 - interface_height_ - gem_thickness_/2);
     new G4PVPlacement(0, gem_center, gem_logic, "GEM", lxe_logic, false, 0, false);
+
+
+
+    // CsI
+    // ------------------------------------------
+    G4double      eps       = 1e-9 * mm;
+    G4Tubs*       csi_hole  = new G4Tubs("Hole", 0, hole_diam_/2, csi_thickness_/2 + eps, 0, twopi);
+    G4MultiUnion* csi_holes = new G4MultiUnion("CsI_holes");
+
+    G4RotationMatrix rotation = G4RotationMatrix();
+    for   (G4double x=-tpc_radius_; x<tpc_radius_; x += hole_pitch_){
+      for (G4double y=-tpc_radius_; y<tpc_radius_; y += hole_pitch_){
+        if (std::sqrt(x*x + y*y) - csi_radius_ > hole_diam_/2) continue;
+
+        G4Transform3D transform(rotation, G4ThreeVector(x, y, 0));
+        holes->AddNode(*hole, transform);
+      }
+    }
+
+    holes->Voxelize();
+
+    G4Tubs*             csi_full  = new G4Tubs("CsI_full", 0, csi_radius_, csi_thickness_/2, 0, twopi);
+    G4SubtractionSolid* csi_solid = new G4SubtractionSolid("CsI", csi_full, csi_holes);
+    G4Material*         csi       = MaterialsList::CsI();
+    G4LogicalVolume*    csi_logic = new G4LogicalVolume(csi_solid, csi, "CsI");
+
+    csi_logic->SetVisAttributes(nexus::Black);
+
+    G4ThreeVector        csi_center (0, 0, lxe_length/2 - interface_height_ - gem_thickness_/2 - csi_thickness_/2);
+    new G4PVPlacement(0, csi_center, csi_logic, "CsI", lxe_logic, false, 0, false);
+
   }
 
 

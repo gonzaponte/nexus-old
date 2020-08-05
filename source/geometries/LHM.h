@@ -44,6 +44,8 @@ namespace nexus {
     G4double elgap_length_;
     G4double hole_diam_;
     G4double hole_pitch_;
+    G4double csi_radius_;
+    G4double csi_thickness_;
 
   };
 
