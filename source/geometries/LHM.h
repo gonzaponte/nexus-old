@@ -38,7 +38,7 @@ namespace nexus {
     G4GenericMessenger* msg_;
 
     G4double tpc_radius_;
-    G4double tpc_height_;
+    G4double drift_distance_;
     G4double gem_thickness_;
     G4double interface_height_;
     G4double elgap_length_;

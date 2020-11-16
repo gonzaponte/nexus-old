@@ -22,7 +22,7 @@
 
 # GEOMETRY
 #/Geometry/LHM/tpc_radius       10   cm
-#/Geometry/LHM/tpc_height       5    cm
+#/Geometry/LHM/drift_distance       5    cm
 #/Geometry/LHM/gem_thickness    0.4  mm
 #/Geometry/LHM/interface_height 5    mm
 #/Geometry/LHM/elgap_length     1    cm
