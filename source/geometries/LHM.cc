@@ -134,6 +134,7 @@ namespace nexus {
     lxe      ->SetMaterialPropertiesTable(OpticalMaterialProperties::LXe());
     lxe_logic->SetVisAttributes(nexus::DarkGreen);
 
+    // Bottom of the Th gem at z=0
     G4ThreeVector        lxe_center(0, 0, -lxe_length/2 + interface_height_ + gem_thickness_);
     new G4PVPlacement(0, lxe_center, lxe_logic, "LXe", lab_logic, false, 0, false);
 
