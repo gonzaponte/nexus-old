@@ -36,7 +36,7 @@ namespace nexus {
     BaseGeometry(),
     msg_(0),
     tpc_radius_      (10   * cm),
-    drift_distance_  (5    * cm),
+    drift_length_    (5    * cm),
     gem_thickness_   (0.4  * mm),
     interface_height_(5    * mm),
     elgap_length_    (1    * cm),
@@ -54,10 +54,10 @@ namespace nexus {
     tpc_radius_cmd.SetRange("tpc_radius>0.");
 
     G4GenericMessenger::Command&
-    drift_distance_cmd = msg_->DeclareProperty("drift_distance", drift_distance_, "Drift distance");
-    drift_distance_cmd.SetUnitCategory("Length");
-    drift_distance_cmd.SetParameterName("drift_distance", false);
-    drift_distance_cmd.SetRange("drift_distance>0.");
+    drift_length_cmd = msg_->DeclareProperty("drift_length", drift_length_, "Drift length");
+    drift_length_cmd.SetUnitCategory("Length");
+    drift_length_cmd.SetParameterName("drift_length", false);
+    drift_length_cmd.SetRange("drift_length>0.");
 
     G4GenericMessenger::Command&
     gem_thickness_cmd = msg_->DeclareProperty("gem_thickness", gem_thickness_, "GEM thickness");
@@ -111,7 +111,7 @@ namespace nexus {
   {
     // LAB
     // ------------------------------------------
-    G4double         lab_size  = std::max(tpc_radius_, drift_distance_) * 3;
+    G4double         lab_size  = std::max(tpc_radius_, drift_length_) * 3;
     G4Box*           lab_solid = new G4Box("Lab", lab_size, lab_size, lab_size);
     G4Material*      air       = G4NistManager::Instance()->FindOrBuildMaterial("G4_AIR");
     G4LogicalVolume* lab_logic = new G4LogicalVolume(lab_solid, air, "Lab");
@@ -126,7 +126,7 @@ namespace nexus {
 
     // LXe
     // ------------------------------------------
-    G4double         lxe_length = drift_distance_ + gem_thickness_ + interface_height_;
+    G4double         lxe_length = drift_length_ + gem_thickness_ + interface_height_;
     G4Tubs*          lxe_solid  = new G4Tubs("LXe", 0, tpc_radius_, lxe_length/2, 0, twopi);
     G4Material*      lxe        = G4NistManager::Instance()->FindOrBuildMaterial("G4_lXe");
     G4LogicalVolume* lxe_logic  = new G4LogicalVolume(lxe_solid, lxe, "LXe");
