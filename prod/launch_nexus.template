@@ -1,0 +1,11 @@
+#!/usr/bin/bash
+
+cd
+
+source .bash_profile
+
+setup geant4
+
+cd /home/gonzalo/sw/git/nexus/build/source
+
+time ./nexus -n {n_evt} -b {initfile} > {logfile}

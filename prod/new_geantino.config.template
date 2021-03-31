@@ -1,0 +1,62 @@
+### ---------------------------------------------------------
+###  This macro simulates Kr83 decays uniformly in the active
+###  volume and using the full simulation
+### ---------------------------------------------------------
+
+
+/run/verbose 0
+/event/verbose 0
+/tracking/verbose 0
+
+/Actions/GeantinoSteppingAction/reject_volume ACTIVE
+/Actions/GeantinoSteppingAction/reject_volume DRIFT_TPB
+/Actions/GeantinoSteppingAction/reject_volume DRIFT_TUBE
+/Actions/GeantinoSteppingAction/reject_volume VESSEL_GAS
+/Actions/GeantinoSteppingAction/reject_volume FIELD_RING
+/Actions/GeantinoSteppingAction/reject_volume HDPE_TUBE
+/Actions/GeantinoSteppingAction/reject_volume ICS
+/Actions/GeantinoSteppingAction/reject_volume VESSEL
+/Actions/GeantinoSteppingAction/reject_volume INNER_AIR
+/Actions/GeantinoSteppingAction/reject_volume EL_GAP
+/Actions/GeantinoSteppingAction/reject_volume TPB_ANODE
+/Actions/GeantinoSteppingAction/reject_volume EL_QUARTZ_ANODE
+/Actions/GeantinoSteppingAction/reject_volume ITO_ANODE
+/Actions/GeantinoSteppingAction/reject_volume DICE_BOARD
+/Actions/GeantinoSteppingAction/reject_volume SUPPORT_PLATE
+/Actions/GeantinoSteppingAction/reject_volume CATHODE_GRID
+/Actions/GeantinoSteppingAction/reject_volume BUFFER
+/Actions/GeantinoSteppingAction/reject_volume CARRIER_PLATE
+/Actions/GeantinoSteppingAction/reject_volume ENCLOSURE
+/Actions/GeantinoSteppingAction/reject_volume ENCLOSURE_WINDOW
+/Actions/GeantinoSteppingAction/reject_volume ENCLOSURE_GAS
+/Actions/GeantinoSteppingAction/reject_volume PMT
+/Actions/GeantinoSteppingAction/reject_volume PMT_GAS
+/Actions/GeantinoSteppingAction/reject_volume PMT_BASE
+/Actions/GeantinoSteppingAction/reject_volume TRACKING_FRAMES
+/Actions/GeantinoSteppingAction/reject_volume ENCLOSURE_TPB
+/Actions/GeantinoSteppingAction/reject_volume OPTICAL_PAD
+/Actions/GeantinoSteppingAction/reject_volume PMT_WINDOW
+/Actions/GeantinoSteppingAction/reject_volume PMT_PHOTOCATHODE
+/Actions/GeantinoSteppingAction/reject_volume SIPMSensl
+/Actions/GeantinoSteppingAction/reject_volume DB_PLUG
+/Actions/GeantinoSteppingAction/reject_volume PHOTODIODES
+/Actions/GeantinoSteppingAction/reject_volume PLASTIC
+/Actions/GeantinoSteppingAction/reject_volume UPPER_PORT
+/Actions/GeantinoSteppingAction/reject_volume UPPER_PORT_AIR
+
+# GENERATION
+/Generator/SingleParticle/particle geantino
+/Generator/SingleParticle/min_energy 1  eV
+/Generator/SingleParticle/max_energy 1 keV
+/Generator/SingleParticle/pos_X   0 mm
+/Generator/SingleParticle/pos_Y   0 mm
+/Generator/SingleParticle/pos_Z 100 mm
+
+# GEOMETRY
+/Geometry/NextNew/pressure 10. bar
+/Geometry/PmtR11410/SD_depth 4
+/Geometry/KDB/teflon_masks true
+
+/nexus/persistency/eventType geantino
+/nexus/persistency/start_id  {start_id}
+/nexus/persistency/outputFile {datafile}

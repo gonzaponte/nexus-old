@@ -1,0 +1,33 @@
+### ---------------------------------------------------------
+###  This macro simulates Kr83 decays uniformly in the active
+###  volume and using the full simulation
+### ---------------------------------------------------------
+
+
+/run/verbose 0
+/event/verbose 0
+/tracking/verbose 0
+
+# GENERATION
+/Generator/SingleParticle/particle e-
+/Generator/SingleParticle/min_energy 1 keV
+/Generator/SingleParticle/max_energy 2 keV
+/Generator/SingleParticle/region "AD_HOC"
+
+/Geometry/NextNew/specific_vertex_X {x} mm
+/Geometry/NextNew/specific_vertex_Y {y} mm
+/Geometry/NextNew/specific_vertex_Z {z} mm
+
+# GEOMETRY
+/Geometry/NextNew/pressure 10. bar
+/Geometry/NextNew/sc_yield 1. 1/MeV
+/Geometry/NextNew/e_lifetime 1000. ms
+/Geometry/NextNew/EL_field 10 kV/cm
+/Geometry/NextNew/elfield true
+/Geometry/NextNew/real_mesh {use_mesh}
+/Geometry/PmtR11410/SD_depth 4
+/Geometry/PmtR11410/time_binning 1. millisecond
+/Geometry/SiPMSensl/time_binning 1. millisecond
+
+/nexus/persistency/start_id {start_id}
+/nexus/persistency/outputFile {outputfile}
