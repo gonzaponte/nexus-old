@@ -1,0 +1,22 @@
+### --------------------------------------------------------
+### This init macro simulates geantinos in the NEW geometry
+### shot from an specific vertex isotropically
+### --------------------------------------------------------
+
+
+/PhysicsList/RegisterPhysics G4EmStandardPhysics_option4
+/PhysicsList/RegisterPhysics G4DecayPhysics
+/PhysicsList/RegisterPhysics G4RadioactiveDecayPhysics
+/PhysicsList/RegisterPhysics NexusPhysics
+/PhysicsList/RegisterPhysics G4StepLimiterPhysics
+
+/Geometry/RegisterGeometry NEXT_NEW
+
+/Generator/RegisterGenerator SINGLE_PARTICLE
+
+/Actions/RegisterTrackingAction DEFAULT
+/Actions/RegisterEventAction SAVE_ALL
+/Actions/RegisterSteppingAction SAVE_ALL
+/Actions/RegisterRunAction DEFAULT
+
+/nexus/RegisterMacro macros/NEW_mesh.config.mac
