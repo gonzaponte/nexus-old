@@ -64,7 +64,7 @@ void SaveAllSteppingAction::UserSteppingAction(const G4Step* step)
   G4ThreeVector   final_pos = post->GetPosition();
 
   G4String initial_volume = pre ->GetTouchableHandle()->GetVolume()->GetName();
-  G4String   final_volume = post->GetTouchableHandle()->GetVolume()->GetName();
+  G4String final_volume =  initial_volume == "WORLD" ? "NONE" : post->GetTouchableHandle()->GetVolume()->GetName();
   G4String      proc_name = post->GetProcessDefinedStep()->GetProcessName();
 
   if (!KeepVolume(initial_volume, final_volume))
