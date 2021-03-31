@@ -43,7 +43,10 @@ namespace nexus {
     hole_diam_       (0.3  * mm),
     hole_pitch_      (1    * mm),
     csi_radius_      (5    * mm),
-    csi_thickness_   (0.01 * mm)
+    csi_thickness_   (0.01 * mm),
+    vapor_pressure_  (1.2  * bar),
+    outer_pressure_  (1.3  * bar),
+    temperature_     (170  * kelvin)
   {
     msg_ = new G4GenericMessenger(this, "/Geometry/LHM/", "Control commands of geometry LHM.");
 
@@ -90,16 +93,37 @@ namespace nexus {
     hole_pitch_cmd.SetRange("hole_pitch>hole_diam");
 
     G4GenericMessenger::Command&
-    tpc_radius_cmd = msg_->DeclareProperty("csi_radius", csi_radius_, "CsI radius");
-    tpc_radius_cmd.SetUnitCategory("Length");
-    tpc_radius_cmd.SetParameterName("csi_radius", false);
-    tpc_radius_cmd.SetRange("csi_radius>0.");
+    csi_radius_cmd = msg_->DeclareProperty("csi_radius", csi_radius_, "CsI radius");
+    csi_radius_cmd.SetUnitCategory("Length");
+    csi_radius_cmd.SetParameterName("csi_radius", false);
+    csi_radius_cmd.SetRange("csi_radius>0.");
 
     G4GenericMessenger::Command&
-    tpc_radius_cmd = msg_->DeclareProperty("csi_thickness", csi_thickness_, "CsI thickness");
-    tpc_radius_cmd.SetUnitCategory("Length");
-    tpc_radius_cmd.SetParameterName("csi_thickness", false);
-    tpc_radius_cmd.SetRange("csi_thickness>0.");
+    csi_thickness_cmd = msg_->DeclareProperty("csi_thickness", csi_thickness_, "CsI thickness");
+    csi_thickness_cmd.SetUnitCategory("Length");
+    csi_thickness_cmd.SetParameterName("csi_thickness", false);
+    csi_thickness_cmd.SetRange("csi_thickness>0.");
+
+
+    G4GenericMessenger::Command&
+    vapor_pressure_cmd = msg_->DeclareProperty("vapor_pressure", vapor_pressure, "Vapor pressure");
+    vapor_pressure_cmd.SetUnitCategory("Pressure");
+    vapor_pressure_cmd.SetParameterName("vapor_pressure", false);
+    vapor_pressure_cmd.SetRange("vapor_pressure>0.");
+
+
+    G4GenericMessenger::Command&
+    outer_pressure_cmd = msg_->DeclareProperty("outer_pressure", outer_pressure_, "Outer pressure");
+    outer_pressure_cmd.SetUnitCategory("Pressure");
+    outer_pressure_cmd.SetParameterName("outer_pressure", false);
+    outer_pressure_cmd.SetRange("outer_pressure>0.");
+
+
+    G4GenericMessenger::Command&
+    temperature_cmd = msg_->DeclareProperty("temperature", temperature_, "Temperature");
+    temperature_cmd.SetUnitCategory("Temperature");
+    temperature_cmd.SetParameterName("temperature", false);
+    temperature_cmd.SetRange("temperature>0.");
 
   }
 
@@ -141,7 +165,7 @@ namespace nexus {
 
     // GXe
     // ------------------------------------------
-    G4Tubs*          gxe_solid  = new G4Tubs("LXe", 0, tpc_radius_, elgap_length_/2, 0, twopi);
+    G4Tubs*          gxe_solid  = new G4Tubs("GXe", 0, tpc_radius_, elgap_length_/2, 0, twopi);
     G4Material*      gxe        = MaterialsList::GXe(1 * bar, 166);
     G4LogicalVolume* gxe_logic  = new G4LogicalVolume(gxe_solid, gxe, "GXe");
 
@@ -155,8 +179,8 @@ namespace nexus {
     // THGEM
     // ------------------------------------------
     G4double      eps   = 1e-9 * mm;
-    G4Tubs*       hole  = new G4Tubs("Hole", 0, hole_diam_/2, gem_thickness_/2 + eps, 0, twopi);
-    G4MultiUnion* holes = new G4MultiUnion("Holes");
+    G4Tubs*       hole  = new G4Tubs("Ins_hole", 0, hole_diam_/2, gem_thickness_/2 + eps, 0, twopi);
+    G4MultiUnion* holes = new G4MultiUnion("Ins_holes");
 
     G4RotationMatrix rotation = G4RotationMatrix();
     for   (G4double x=-tpc_radius_; x<tpc_radius_; x += hole_pitch_){
@@ -170,15 +194,15 @@ namespace nexus {
 
     holes->Voxelize();
 
-    G4Tubs*             full_gem_solid = new G4Tubs("fullGEM", 0, tpc_radius_, gem_thickness_/2, 0, twopi);
-    G4SubtractionSolid*      gem_solid = new G4SubtractionSolid("GEM", full_gem_solid, holes);
-    G4Material*              fr4       = MaterialsList::FR4();
-    G4LogicalVolume*         gem_logic = new G4LogicalVolume(gem_solid, fr4, "GEM");
+    G4Tubs*             full_ins_solid    = new G4Tubs("Insulator", 0, tpc_radius_, gem_thickness_/2, 0, twopi);
+    G4SubtractionSolid*      ins_solid    = new G4SubtractionSolid("Insulator", full_ins_solid, holes);
+    G4Material*              ins_material = MaterialsList::FR4();
+    G4LogicalVolume*         ins_logic    = new G4LogicalVolume(ins_solid, ins_material, "Insulator");
 
     gem_logic->SetVisAttributes(nexus::DarkGrey);
 
-    G4ThreeVector        gem_center (0, 0, lxe_length/2 - interface_height_ - gem_thickness_/2);
-    new G4PVPlacement(0, gem_center, gem_logic, "GEM", lxe_logic, false, 0, false);
+    G4ThreeVector        ins_center (0, 0, lxe_length/2 - interface_height_ - gem_thickness_/2);
+    new G4PVPlacement(0, ins_center, ins_logic, "Insulator", lxe_logic, false, 0, false);
 
 
 
@@ -218,7 +242,6 @@ namespace nexus {
   {
     G4ThreeVector vertex(0.,0.,0.);
 
-    //AIR AROUND SHIELDING
     if      (region == "ELGAP_CENTER") {
       G4double z = interface_height_ + G4UniformRand() * elgap_length_;
       vertex.set(0, 0, z);
@@ -227,6 +250,17 @@ namespace nexus {
       G4double x =             - 2.5 + G4UniformRand() * 5            ;
       G4double y =             - 2.5 + G4UniformRand() * 5            ;
       G4double z = interface_height_ + G4UniformRand() * elgap_length_;
+      vertex.set(x, y, z);
+    }
+    else if (region == "ACTIVE") {
+      G4double x, y, r, z;
+      r = tpc_radius_ * 2;
+      while (r > tpc_radius_){
+        x = -tpc_radius + G4UniformRand() * tpc_radius_ * 2;
+        y = -tpc_radius + G4UniformRand() * tpc_radius_ * 2;
+        r = std::sqrt(x*x + y*y);
+      }
+      z = -G4UniformRand() * drift_length_;
       vertex.set(x, y, z);
     }
     else if (region == "AD_HOC") {

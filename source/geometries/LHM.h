@@ -47,6 +47,10 @@ namespace nexus {
     G4double csi_radius_;
     G4double csi_thickness_;
 
+    G4double vapor_pressure_;
+    G4double outer_pressure_;
+    G4double temperature_;
+
   };
 
 } // end namespace nexus
