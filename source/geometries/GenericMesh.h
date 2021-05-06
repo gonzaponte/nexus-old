@@ -41,6 +41,8 @@ namespace nexus {
     G4double mesh_diam_ ; // for circular shape
     G4double mesh_width_; // for rectangular shape
 
+    G4double mesh_angle_; // angle wrt z axis
+
     G4double wire_pitch_    ; // for circular and rectangular shapes
     G4double wire_diam_     ; // for circular shape
     G4double wire_thickness_; // for rectangular shape
