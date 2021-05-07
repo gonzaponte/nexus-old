@@ -1,0 +1,61 @@
+## ----------------------------------------------------------------------------
+## nexus | NEXT100.config.mac
+##
+## Configuration macro to simulate Bi-214 radioactive decays from thethe
+## copper plate of the tracking plane in the NEXT-100 detector.
+##
+## The NEXT Collaboration
+## ----------------------------------------------------------------------------
+
+##### VERBOSITY #####
+/run/verbose 0
+/event/verbose 0
+/tracking/verbose 0
+
+##### GEOMETRY #####
+/Geometry/GenericMesh/wire_material G4_Cu
+/Geometry/GenericMesh/mesh_angle     45 deg
+/Geometry/GenericMesh/wire_pitch    200 um
+
+# CIRCULAR MESH CIRCULAR WIRE
+#/Geometry/GenericMesh/wire_shape circular
+#/Geometry/GenericMesh/mesh_shape circular
+#/Geometry/GenericMesh/mesh_diam       1 mm
+#/Geometry/GenericMesh/wire_diam      10 um
+
+
+# RECTANGULAR MESH CIRCULAR WIRE
+#/Geometry/GenericMesh/wire_shape    circular
+#/Geometry/GenericMesh/mesh_shape rectangular
+#/Geometry/GenericMesh/mesh_width      1 mm
+#/Geometry/GenericMesh/wire_diam      10 um
+
+
+# CIRCULAR MESH RECTANGULAR WIRE
+#/Geometry/GenericMesh/wire_shape rectangular
+#/Geometry/GenericMesh/mesh_shape    circular
+#/Geometry/GenericMesh/mesh_diam       1 mm
+#/Geometry/GenericMesh/wire_width     10 um
+#/Geometry/GenericMesh/wire_thickness 50 um
+
+
+# RECTANGULAR MESH RECTANGULAR WIRE
+/Geometry/GenericMesh/wire_shape rectangular
+/Geometry/GenericMesh/mesh_shape rectangular
+/Geometry/GenericMesh/mesh_width      1 mm
+/Geometry/GenericMesh/wire_width     10 um
+/Geometry/GenericMesh/wire_thickness 50 um
+
+
+# GENERATION
+/Generator/SingleParticle/particle geantino
+/Generator/SingleParticle/min_energy 1  eV
+/Generator/SingleParticle/max_energy 1 keV
+/Generator/SingleParticle/region ONAXIS
+
+# ACTIONS
+/Actions/SaveAllSteppingAction/select_particle geantino
+/Actions/SaveAllSteppingAction/select_volume WIRE
+
+##### PERSISTENCY #####
+/nexus/persistency/outputFile mesh.next
