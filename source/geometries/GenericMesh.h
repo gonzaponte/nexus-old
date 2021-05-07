@@ -30,9 +30,10 @@ namespace nexus {
 
   private:
 
-    // Messenger for the definition of control commands
     G4GenericMessenger* msg_;
-    G4bool   visibility_;
+
+    G4bool visibility_;
+    G4bool create_lab_;
 
     G4String wire_material_;
     G4String wire_shape_   ; // circular | rectangular
@@ -48,6 +49,7 @@ namespace nexus {
     G4double wire_thickness_; // for rectangular shape
     G4double wire_width_    ; // for rectangular shape
 
+    void BuildLab();
   };
 }
 
