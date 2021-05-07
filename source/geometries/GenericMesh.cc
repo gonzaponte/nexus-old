@@ -87,29 +87,30 @@ void GenericMesh::Construct()
   else if (mesh_shape_ == "circular"   ) length = mesh_diam_ ;
   else     G4cerr << "Invalid mesh shape: " << mesh_shape_ << G4endl;
 
-       if (wire_shape_ == "rectangular") wire = new G4Box {"wire", wire_width_/2, length/2, wire_thickness_/2};
+       if (wire_shape_ == "rectangular") wire = new G4Box {"wire", wire_thickness_/2, wire_width_/2, length/2};
   else if (wire_shape_ == "circular"   ) wire = new G4Tubs{"wire", 0, wire_diam_/2, length/2, 0, 2*pi};
   else     G4cerr << "Invalid wire shape: " << wire_shape_ << G4endl;
 
   G4MultiUnion* all_wires = new G4MultiUnion{"wires"};
 
-  int n_wires = std::ceil(length / wire_pitch_) - 1;
+  G4int    n_wires = 2 * std::ceil( (length - wire_pitch_) / (2 * wire_pitch_) );
+  G4double start   = -wire_pitch_/2 - (n_wires - 1)/2 * wire_pitch_;
 
   G4RotationMatrix along_x_axis{}; along_x_axis.rotateY(90 * deg);
-  G4RotationMatrix along_y_axis{}; along_y_axis.rotateX(90 * deg);
+  G4RotationMatrix along_y_axis{}; along_y_axis.rotateX(90 * deg); along_y_axis.rotateY(90 * deg);
 
   // HORIZONTAL WIRES
-  for (G4int i=1; i<n_wires; i++)
+  for (G4int i=0; i<n_wires; i++)
   {
-    G4ThreeVector pos       = G4ThreeVector{0,  -length/2 + wire_pitch_ * i, 0};
+    G4ThreeVector pos       = G4ThreeVector{0,  start + wire_pitch_ * i, 0};
     G4Transform3D transform = G4Transform3D(along_x_axis, pos);
     all_wires->AddNode(*wire, transform);
   }
-  
+
   // VERTICAL WIRES
-  for (G4int i=1; i<n_wires; i++)
+  for (G4int i=0; i<n_wires; i++)
   {
-    G4ThreeVector pos       = G4ThreeVector{-length/2 + wire_pitch_ * i, 0, 0};
+    G4ThreeVector pos       = G4ThreeVector{start + wire_pitch_ * i, 0, 0};
     G4Transform3D transform = G4Transform3D(along_y_axis, pos);
     all_wires->AddNode(*wire, transform);
   }
@@ -131,7 +132,7 @@ void GenericMesh::Construct()
   G4Material*      wire_material = G4NistManager::Instance()->FindOrBuildMaterial(wire_material_);
   G4LogicalVolume* wire_logic    = new G4LogicalVolume{wires, wire_material, "wires"};
 
-  G4RotationMatrix* rotation = new G4RotationMatrix{}; rotation->rotateZ(mesh_angle_);
+  G4RotationMatrix* rotation = new G4RotationMatrix{}; rotation->rotateX(mesh_angle_);
   new G4PVPlacement( rotation
                    , G4ThreeVector{}
                    , wire_logic
@@ -167,7 +168,7 @@ void GenericMesh::BuildLab()
 
 G4ThreeVector GenericMesh::GenerateVertex(const G4String& region) const{
   G4double x=0, y=0, z=0;
-  if (region == "IN_FRONT") {
+  if (region == "ONAXIS") {
     z = G4UniformRand() * std::max(mesh_diam_, mesh_width_) / 2;
   }
   else {
