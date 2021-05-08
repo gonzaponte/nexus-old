@@ -168,7 +168,12 @@ void GenericMesh::BuildLab()
 
 G4ThreeVector GenericMesh::GenerateVertex(const G4String& region) const{
   G4double x=0, y=0, z=0;
-  if (region == "ONAXIS") {
+       if (region == "ONAXIS") {
+    z = G4UniformRand() * std::max(mesh_diam_, mesh_width_) / 2;
+  }
+  else if (region == "AROUNDAXIS") {
+    x = G4UniformRand() * 2 * wire_pitch_ - wire_pitch_;
+    y = G4UniformRand() * 2 * wire_pitch_ - wire_pitch_;
     z = G4UniformRand() * std::max(mesh_diam_, mesh_width_) / 2;
   }
   else {
